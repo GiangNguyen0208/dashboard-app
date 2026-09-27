@@ -1,0 +1,43 @@
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "20m"
+    max-file: "5"
+
+services:
+  frontend:
+    build: .
+    container_name: dashboard-app
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 20s
+    logging: *default-logging
+    ports:
+      - "5173:80"
+    environment:
+      # Đích backend mà nginx proxy /api/ và /downloads/ tới.
+      # Đổi giá trị này (hoặc tạo file .env) để trỏ tới bất kỳ backend nào:
+      #   - backend chạy bằng docker compose ở repo core-be trên cùng máy:
+      #       http://host.docker.internal:8000        (mặc định)
+      #   - backend ở máy khác / domain thật:
+      #       https://api.ten-mien-cua-ban.com
+      #   - backend chung docker network (tùy chọn nâng cao):
+      #       http://<tên-service-backend>:8000
+      BACKEND_UPSTREAM: ${BACKEND_UPSTREAM:-http://host.docker.internal:8000}
+    # Cho phép container gọi tới cổng đã publish trên máy host (Linux cần dòng này,
+    # Docker Desktop tự có sẵn).
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "-q",
+          "--spider",
+          "http://127.0.0.1/",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s

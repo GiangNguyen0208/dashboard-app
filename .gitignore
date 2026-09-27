@@ -1,0 +1,43 @@
+# ============================================================
+# dashboard-app (.gitignore)
+# Repo frontend độc lập — không còn tham chiếu tới backend.
+# ============================================================
+
+# --- Dependencies ---
+node_modules
+
+# --- Build output ---
+dist
+dist-ssr
+
+# --- Logs ---
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# --- Biến môi trường cục bộ (KHÔNG COMMIT) ---
+.env
+.env.*
+!.env.example
+*.local
+
+# --- Editor / OS ---
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ============================================================
+# LƯU Ý: KHÔNG ignore yarn.lock.
+# Dockerfile dùng `yarn install --frozen-lockfile`, nên lockfile BẮT BUỘC
+# phải được commit — nếu không, clone mới sẽ build lỗi.
+# ============================================================
