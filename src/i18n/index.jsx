@@ -91,7 +91,11 @@ export function setLocale(locale) {
   listeners.forEach((listener) => listener());
 }
 
-function subscribe(listener) {
+/**
+ * Subscribes to locale changes. React trees normally use `useI18n()`; this is
+ * exposed for non-React consumers (and tests) that need the same signal.
+ */
+export function subscribe(listener) {
   listeners.add(listener);
   return () => listeners.delete(listener);
 }

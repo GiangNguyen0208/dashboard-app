@@ -3374,14 +3374,14 @@ function App() {
         {tasks.length > TASK_PAGE_SIZE ? (
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/8 pt-5">
             <div className="text-sm text-[var(--text-soft)]">
-              Hiển thị {pagedTasks.length} / {tasks.length} tác vụ gần nhất.
+              {t('operations.tasksPagination', { shown: pagedTasks.length, total: tasks.length })}
             </div>
             <div className="flex gap-2">
               <button type="button" disabled={taskPage <= 1} onClick={() => setTaskPage((current) => Math.max(1, current - 1))} className={BUTTON_GHOST}>
-                Trước
+                {t('common.previous')}
               </button>
               <button type="button" disabled={taskPage >= totalTaskPages} onClick={() => setTaskPage((current) => Math.min(totalTaskPages, current + 1))} className={BUTTON_GHOST}>
-                Sau
+                {t('common.next')}
               </button>
             </div>
           </div>
@@ -3407,14 +3407,14 @@ function App() {
         {events.length > SYSTEM_EVENT_PAGE_SIZE ? (
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/8 pt-5">
             <div className="text-sm text-[var(--text-soft)]">
-              Hiển thị {pagedEvents.length} / {events.length} sự kiện gần nhất.
+              {t('operations.eventsPagination', { shown: pagedEvents.length, total: events.length })}
             </div>
             <div className="flex gap-2">
               <button type="button" disabled={eventPage <= 1} onClick={() => setEventPage((current) => Math.max(1, current - 1))} className={BUTTON_GHOST}>
-                Trước
+                {t('common.previous')}
               </button>
               <button type="button" disabled={eventPage >= totalEventPages} onClick={() => setEventPage((current) => Math.min(totalEventPages, current + 1))} className={BUTTON_GHOST}>
-                Sau
+                {t('common.next')}
               </button>
             </div>
           </div>
@@ -3573,17 +3573,19 @@ function App() {
           <button type="button" onClick={() => handleSectionChange('campaigns')} className="rounded-[22px] border border-white/8 bg-black/10 px-4 py-4 text-left transition hover:border-cyan-400/20 hover:bg-cyan-400/6">
             <div className="text-[11px] uppercase tracking-[0.24em] text-[var(--text-muted)]">{t('nav.campaigns.label')}</div>
             <div className="mt-2 font-medium text-white">
-              {focusCampaigns.length ? `${focusCampaigns.length} chiến dịch cần xem ngay` : t('shell.noHotCampaigns')}
+              {focusCampaigns.length ? t('shell.hotCampaignsCount', { count: focusCampaigns.length }) : t('shell.noHotCampaigns')}
             </div>
           </button>
           <button type="button" onClick={() => handleSectionChange('messages')} className="rounded-[22px] border border-white/8 bg-black/10 px-4 py-4 text-left transition hover:border-cyan-400/20 hover:bg-cyan-400/6">
             <div className="text-[11px] uppercase tracking-[0.24em] text-[var(--text-muted)]">Webhook fanpage</div>
-            <div className="mt-2 font-medium text-white">{connectedMessagePages}/{fbPages.length || 0} trang đã nối đủ feed và messages</div>
+            <div className="mt-2 font-medium text-white">
+              {t('shell.connectedPagesDetail', { done: connectedMessagePages, total: fbPages.length || 0 })}
+            </div>
           </button>
           <button type="button" onClick={() => handleSectionChange('operations')} className="rounded-[22px] border border-white/8 bg-black/10 px-4 py-4 text-left transition hover:border-cyan-400/20 hover:bg-cyan-400/6">
             <div className="text-[11px] uppercase tracking-[0.24em] text-[var(--text-muted)]">{t('common.operations')}</div>
             <div className="mt-2 font-medium text-white">
-              {staleWorkers.length ? `${staleWorkers.length} worker cần dọn` : t('shell.noStaleWorkers')}
+              {staleWorkers.length ? t('shell.staleWorkersCount', { count: staleWorkers.length }) : t('shell.noStaleWorkers')}
             </div>
           </button>
         </div>
@@ -3592,31 +3594,34 @@ function App() {
   );
 
   const metricCards = [
-    { label: t('metric.activeCampaigns'), value: stats.active_campaigns ?? 0, detail: `${stats.paused_campaigns ?? 0} chiến dịch đang tạm dừng`, icon: Share2, tone: 'emerald' },
-    { label: t('metric.readyVideos'), value: stats.ready ?? 0, detail: stats.next_publish ? `Lượt gần nhất sẽ tới ${formatRelTime(stats.next_publish)}` : t('metric.noReadyVideos'), icon: Clock, tone: 'amber' },
-    { label: t('metric.connectedPages'), value: stats.connected_pages ?? 0, detail: invalidPages.length ? `${invalidPages.length} trang cần xem lại token` : t('metric.allPagesHealthy'), icon: Globe2, tone: invalidPages.length ? 'rose' : 'sky' },
+    { label: t('metric.activeCampaigns'), value: stats.active_campaigns ?? 0, detail: t('metric.pausedCampaignsDetail', { count: stats.paused_campaigns ?? 0 }), icon: Share2, tone: 'emerald' },
+    { label: t('metric.readyVideos'), value: stats.ready ?? 0, detail: stats.next_publish ? t('metric.nextPublishDetail', { time: formatRelTime(stats.next_publish) }) : t('metric.noReadyVideos'), icon: Clock, tone: 'amber' },
+    { label: t('metric.connectedPages'), value: stats.connected_pages ?? 0, detail: invalidPages.length ? t('metric.pagesNeedTokenCheck', { count: invalidPages.length }) : t('metric.allPagesHealthy'), icon: Globe2, tone: invalidPages.length ? 'rose' : 'sky' },
     {
       label: t('metric.pendingReplies'),
       value: systemInfo?.pending_replies ?? 0,
-      detail: `${systemInfo?.pending_comment_replies ?? 0} comment • ${systemInfo?.pending_message_replies ?? 0} inbox`,
+      detail: t('metric.pendingRepliesDetail', {
+        comments: systemInfo?.pending_comment_replies ?? 0,
+        inbox: systemInfo?.pending_message_replies ?? 0,
+      }),
       icon: Bot,
       tone: 'sky',
     },
     {
       label: t('metric.tiktokSources'),
       value: stats.by_source?.tiktok?.campaigns ?? 0,
-      detail: `${stats.by_source?.tiktok?.ready ?? 0} video sẵn sàng`,
+      detail: t('metric.sourceReadyDetail', { count: stats.by_source?.tiktok?.ready ?? 0 }),
       icon: Share2,
       tone: 'sky',
     },
     {
       label: t('metric.shortsSources'),
       value: stats.by_source?.youtube?.campaigns ?? 0,
-      detail: `${stats.by_source?.youtube?.ready ?? 0} video sẵn sàng`,
+      detail: t('metric.sourceReadyDetail', { count: stats.by_source?.youtube?.ready ?? 0 }),
       icon: Play,
       tone: 'rose',
     },
-    { label: t('metric.onlineWorkers'), value: onlineWorkers, detail: staleWorkers.length ? `${staleWorkers.length} worker stale cần dọn` : t('metric.noStaleWorkers'), icon: Radio, tone: staleWorkers.length ? 'amber' : 'emerald' },
+    { label: t('metric.onlineWorkers'), value: onlineWorkers, detail: staleWorkers.length ? t('metric.staleWorkersDetail', { count: staleWorkers.length }) : t('metric.noStaleWorkers'), icon: Radio, tone: staleWorkers.length ? 'amber' : 'emerald' },
   ];
   const visibleMetricCards = showAllMetrics ? metricCards : metricCards.slice(0, 4);
 
@@ -3625,7 +3630,7 @@ function App() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[var(--shell-bg)] text-white">
+    <div lang={locale} className="relative min-h-screen overflow-x-hidden bg-[var(--shell-bg)] text-white">
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.14),transparent_36%),radial-gradient(circle_at_bottom_right,rgba(245,158,11,0.10),transparent_26%)]" />
       </div>
@@ -3660,10 +3665,10 @@ function App() {
                       <div className="mt-0.5 rounded-2xl border border-white/8 bg-black/10 p-2.5"><Icon className="h-4 w-4" /></div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-3">
-                          <span className="font-medium text-white">{item.label}</span>
+                          <span className="font-medium text-white">{t(item.labelKey)}</span>
                           <span className="rounded-full border border-white/10 bg-black/10 px-2.5 py-1 text-[11px] text-[var(--text-muted)]">{count}</span>
                         </div>
-                        <div className="mt-1 text-sm text-[var(--text-soft)]">{item.description}</div>
+                        <div className="mt-1 text-sm text-[var(--text-soft)]">{t(item.descriptionKey)}</div>
                       </div>
                     </div>
                   </button>
@@ -3674,7 +3679,8 @@ function App() {
               <div className="text-[11px] uppercase tracking-[0.28em] text-[var(--text-muted)]">{t('shell.currentSession')}</div>
               <div className="mt-2 font-medium text-white">{currentUser?.display_name || currentUser?.username || t('shell.defaultUser')}</div>
               <div className="mt-1 text-sm text-[var(--text-soft)]">{currentUser?.role === 'admin' ? t('security.roleAdmin') : t('common.operations')}</div>
-              <button type="button" className={cx(BUTTON_GHOST, 'mt-4 w-full')} onClick={handleLogout}><LogOut className="h-4 w-4" />{t('shell.logout')}</button>
+              <LanguageSwitcher className="mt-4 w-full" compact={false} />
+              <button type="button" className={cx(BUTTON_GHOST, 'mt-3 w-full')} onClick={handleLogout}><LogOut className="h-4 w-4" />{t('shell.logout')}</button>
             </div>
           </div>
         </div>
@@ -3708,7 +3714,7 @@ function App() {
                     <div className="mt-0.5 rounded-2xl border border-white/8 bg-black/10 p-2.5"><Icon className="h-4 w-4" /></div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-3">
-                        <span className="font-medium text-white">{item.label}</span>
+                        <span className="font-medium text-white">{t(item.labelKey)}</span>
                         <span className="rounded-full border border-white/10 bg-black/10 px-2.5 py-1 text-[11px] text-[var(--text-muted)]">{count}</span>
                       </div>
                     </div>
@@ -3721,7 +3727,8 @@ function App() {
             <div className="text-[11px] uppercase tracking-[0.28em] text-[var(--text-muted)]">{t('shell.currentSession')}</div>
             <div className="mt-3 font-medium text-white">{currentUser?.display_name || currentUser?.username || t('shell.defaultUser')}</div>
             <div className="mt-1 text-sm text-[var(--text-soft)]">{currentUser?.role === 'admin' ? t('security.roleAdmin') : t('common.operations')}</div>
-            <button type="button" className={cx(BUTTON_GHOST, 'mt-4 w-full')} onClick={handleLogout}><LogOut className="h-4 w-4" />{t('shell.logout')}</button>
+            <LanguageSwitcher className="mt-4 w-full" compact={false} />
+            <button type="button" className={cx(BUTTON_GHOST, 'mt-3 w-full')} onClick={handleLogout}><LogOut className="h-4 w-4" />{t('shell.logout')}</button>
           </div>
         </aside>
         <div className="min-w-0 flex-1 lg:pl-[17rem]">
@@ -3735,16 +3742,17 @@ function App() {
                   <div className="min-w-0">
                     <StatusPill tone="sky" icon={Activity}>{t('shell.headerBadge')}</StatusPill>
                     <div className="mt-4 text-[11px] uppercase tracking-[0.32em] text-[var(--text-muted)]">{systemInfo?.project_name || t('shell.defaultProjectName')}</div>
-                    <h1 className="mt-3 font-display text-[1.4rem] font-semibold text-white sm:text-[1.7rem] md:text-[2rem]">{currentSection.label}</h1>
-                    <p className="mt-2 text-sm text-[var(--text-soft)] lg:hidden">{currentSection.description}</p>
+                    <h1 className="mt-3 font-display text-[1.4rem] font-semibold text-white sm:text-[1.7rem] md:text-[2rem]">{t(currentSection.labelKey)}</h1>
+                    <p className="mt-2 text-sm text-[var(--text-soft)] lg:hidden">{t(currentSection.descriptionKey)}</p>
                   </div>
                 </div>
-                <div className="flex flex-col gap-2 sm:flex-row">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <button type="button" className={cx(BUTTON_GHOST, 'lg:hidden')} onClick={() => handleSectionChange('overview')}>
                     <Globe2 className="h-4 w-4" />
-                    Tổng quan
+                    {t('nav.overview.label')}
                   </button>
                   <button type="button" className={BUTTON_SECONDARY} onClick={() => fetchDashboard()}><RefreshCw className={cx('h-4 w-4', isRefreshing ? 'animate-spin' : '')} />{t('common.refresh')}</button>
+                  <LanguageSwitcher />
                 </div>
               </div>
               {notice ? <div className={cx('mt-5 rounded-[24px] border px-4 py-4 text-sm leading-7', notice.type === 'success' ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-100' : 'border-rose-400/20 bg-rose-400/10 text-rose-100')}>{notice.message}</div> : null}
@@ -3763,7 +3771,7 @@ function App() {
               <aside className="hidden space-y-5 2xl:sticky 2xl:top-5 2xl:block 2xl:h-fit">
                 <Panel eyebrow={t('shell.quickPulseEyebrow')} title={t('shell.sidePanelTitle')}>
                   <div className="space-y-3">
-                    <InfoRow label="Server time" value={formatDateTime(systemInfo?.server_time)} />
+                    <InfoRow label={t('shell.serverTime')} value={formatDateTime(systemInfo?.server_time)} />
                     <InfoRow label={t('shell.lastRefreshed')} value={formatDateTime(lastUpdatedAt)} />
                     <InfoRow label={t('overview.nextPublish')} value={formatRelTime(stats.next_publish)} />
                     <InfoRow label={t('overview.queueEnd')} value={formatDateTime(stats.queue_end)} />
@@ -3774,13 +3782,16 @@ function App() {
                   <div className="space-y-3">
                     {focusCampaigns.length === 0 ? (
                       <div className="rounded-[22px] border border-white/8 bg-black/10 px-4 py-4 text-sm leading-7 text-[var(--text-soft)]">
-                        Chưa có chiến dịch cần chú ý.
+                        {t('shell.noFocusCampaigns')}
                       </div>
                     ) : focusCampaigns.map((campaign) => (
                       <button key={campaign.id} type="button" onClick={() => handleSectionChange('campaigns')} className="w-full rounded-[22px] border border-white/8 bg-black/10 px-4 py-4 text-left transition hover:border-cyan-400/20 hover:bg-cyan-400/6">
                         <div className="font-medium text-white">{campaign.name}</div>
                         <div className="mt-2 text-sm text-[var(--text-soft)]">
-                          {campaign.video_counts?.failed ?? 0} video failed • trạng thái sync {getSyncStateMeta(campaign.last_sync_status).label.toLowerCase()}
+                          {t('shell.focusCampaignSync', {
+                            count: campaign.video_counts?.failed ?? 0,
+                            status: getSyncStateMeta(campaign.last_sync_status).label.toLowerCase(),
+                          })}
                         </div>
                       </button>
                     ))}
